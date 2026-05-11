@@ -46,12 +46,12 @@ jobs:
             CONFIG_TARGET_ALL_PROFILES=y
             CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 
-            CONFIG_ATH11K_MEM_PROFILE_256M=y
+            CONFIG_ATH11K_MEM_PROFILE_512M=y
 
-            CONFIG_IB=y
+            #CONFIG_IB=y
             # CONFIG_IB_STANDALONE is not set
-            CONFIG_SDK=y
-            CONFIG_MAKE_TOOLCHAIN=y
+            #CONFIG_SDK=y
+           # CONFIG_MAKE_TOOLCHAIN=y
 
             CONFIG_REPRODUCIBLE_DEBUG_INFO=y
 
