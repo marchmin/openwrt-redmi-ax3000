@@ -55,7 +55,7 @@ jobs:
           make -j$(nproc) tools/install
       - name: Build toolchain
         run: |
-          make -j$(nproc) toolchain/install
+          make -j1 toolchain/install
       - name: Build all
         run: |
           make -j$(nproc) IGNORE_ERRORS=1
