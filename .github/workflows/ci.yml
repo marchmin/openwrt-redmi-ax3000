@@ -3,7 +3,6 @@ name: CI
 on:
   workflow_dispatch:
 
-
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -14,9 +13,11 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo add-apt-repository ppa:npalix/coccinelle
           sudo apt update
           sudo apt install build-essential clang flex g++ gawk gcc-multilib gettext \
-            git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev
+            git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev \
+            coccinelle
 
       - name: Checkout
         uses: actions/checkout@main
@@ -44,13 +45,17 @@ jobs:
             CONFIG_TARGET_ALL_PROFILES=y
             CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 
+            CONFIG_ATH11K_MEM_PROFILE_256M=y
+
             CONFIG_IB=y
             # CONFIG_IB_STANDALONE is not set
             CONFIG_SDK=y
             CONFIG_MAKE_TOOLCHAIN=y
 
-            CONFIG_ALL_NONSHARED=y
             CONFIG_REPRODUCIBLE_DEBUG_INFO=y
+
+            CONFIG_PACKAGE_kmod-qca-nss-ecm-standard=y
+            CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
 
             CONFIG_PACKAGE_luci=y
           EOF
@@ -70,7 +75,7 @@ jobs:
 
       - name: Build all
         run: |
-          make -j$(nproc) IGNORE_ERRORS=1
+          make -j$(nproc)
 
       - name: Upload bin to artifacts
         uses: actions/upload-artifact@main
@@ -113,7 +118,7 @@ jobs:
           git rebase --continue
 
       - name: Download bin from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: bin-ipq50xx-arm
           path: bin/
@@ -145,13 +150,13 @@ jobs:
         uses: actions/checkout@main
 
       - name: Download dl from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: dl
           path: dl/
 
       - name: Download bin from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: bin-ipq50xx-arm
           path: bin/targets/ipq50xx/arm/
@@ -189,7 +194,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          prerelease: true
           tag_name: ${{ env.TAG }}
           target_commitish: ${{ github.sha }}
           name: ${{ env.NAME }}
