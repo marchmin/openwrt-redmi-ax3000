@@ -51,6 +51,23 @@ define Device/cmcc_rax3000q
 endef
 TARGET_DEVICES += cmcc_rax3000q
 
+define Device/cmcc_mr3000d-04
+  $(call Device/FitImage)
+  $(call Device/UbiFit)
+  SOC := ipq5018
+  DEVICE_VENDOR := CMCC
+  DEVICE_MODEL := MR3000D-04
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  DEVICE_DTS_CONFIG := config@mp03.3-V1
+  IMAGES := nand-factory.ubi
+  DEVICE_PACKAGES := \
+	ath11k-firmware-ipq5018 \
+	ath11k-firmware-qcn6122 \
+	ipq-wifi-cmcc_mr3000d-04
+endef
+TARGET_DEVICES += cmcc_mr3000d-04
+
 define Device/redmi_ax3000
   $(call Device/FitImage)
   $(call Device/UbiFit)
