@@ -49,10 +49,10 @@ jobs:
             CONFIG_TARGET_ALL_PROFILES=y
             CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 
-            CONFIG_IB=y
+            #CONFIG_IB=y
             # CONFIG_IB_STANDALONE is not set
-            CONFIG_SDK=y
-            CONFIG_MAKE_TOOLCHAIN=y
+            #CONFIG_SDK=y
+            #CONFIG_MAKE_TOOLCHAIN=y
 
             CONFIG_ALL_NONSHARED=y
             CONFIG_REPRODUCIBLE_DEBUG_INFO=y
@@ -72,6 +72,13 @@ jobs:
       - name: Build toolchain
         run: |
           make -j$(nproc) toolchain/install
+
+      - name: SSH connection to Actions
+        uses: P3TERX/ssh2actions@v1.0.0
+          if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
       - name: Build all
         run: |
