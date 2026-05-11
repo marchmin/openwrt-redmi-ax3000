@@ -2,7 +2,12 @@ name: CI
 
 on:
   workflow_dispatch:
-  push:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   build:
