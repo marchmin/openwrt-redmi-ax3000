@@ -33,10 +33,12 @@ jobs:
           TIME="$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" | jq -r .created_at)"
           echo "ci-$(date -d "${TIME}" -u +'%Y%m%d-%H%M%S')-${GITHUB_SHA:0:8}" >version
           sed -i "s|%U/targets/%S/packages|https://${OWNER}.github.io/${REPO}/${GITHUB_REF_NAME}/%R|" include/feeds.mk
+          
       - name: Update and install feeds
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          
       - name: Configure
         run: |
           cat <<EOF | sed -E 's/^  //' >.config
@@ -54,6 +56,7 @@ jobs:
             CONFIG_PACKAGE_luci=y
           EOF
           make defconfig
+          
       - name: Download
         run: |
           make -j16 download
