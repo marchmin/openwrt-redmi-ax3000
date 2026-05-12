@@ -42,7 +42,7 @@ define Device/cmcc_rax3000q
   DEVICE_MODEL := RAX3000Q
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  DEVICE_DTS_CONFIG := config@mp02.1
+  DEVICE_DTS_CONFIG := config@mp03.3-v1
   IMAGES := nand-factory.ubi
   DEVICE_PACKAGES := \
 	ath11k-firmware-ipq5018 \
@@ -101,7 +101,7 @@ define Device/xiaomi_cr881x
   DEVICE_MODEL := CR881x
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  DEVICE_DTS_CONFIG := config@mp03.3
+  DEVICE_DTS_CONFIG := config@mp03.3-v1
   IMAGES := nand-factory.ubi
   DEVICE_PACKAGES := \
 	ATH11K_MEM_PROFILE_256M \
