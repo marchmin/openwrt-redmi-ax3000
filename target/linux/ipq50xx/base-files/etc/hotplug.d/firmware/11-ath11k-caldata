@@ -14,7 +14,7 @@ case "$FIRMWARE" in
 			xiaomi,cr881x)
 				caldata_extract "0:ART" 0x1000 0x20000
 				;;
-			cmcc,mr3000d-ci)
+			cmcc,mr3000d-04)
 				caldata_extract "0:ART" 0x1000 0x20000
 				;;
 		esac
@@ -26,7 +26,7 @@ case "$FIRMWARE" in
 			xiaomi,cr881x)
 				caldata_extract "0:ART" 0x26800 0x20000
 				;;
-			cmcc,mr3000d-ci)
+			cmcc,mr3000d-04)
 				caldata_extract "0:ART"  0x26800 0x20000
 				;;
 		esac
