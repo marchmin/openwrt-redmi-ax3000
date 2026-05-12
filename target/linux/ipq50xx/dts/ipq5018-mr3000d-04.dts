@@ -267,7 +267,7 @@
 					phy_address = <1>;
 				};
 
-				// MAC3 -> Phy2 -> IPQ5000 GE Phy
+				// MAC3 -> Phy2 -> IPQ5018 GE Phy
 				port@3 {
 					port_id = <3>;
 					phy_address = <2>;
@@ -285,7 +285,7 @@
 					phy_address = <4>;
 				};
 
-				// MAC6 ---SGMII---> IPQ5000 MAC1
+				// MAC6 ---SGMII---> IPQ5018 MAC1
 				port@6 {
 					port_id = <6>;
 
