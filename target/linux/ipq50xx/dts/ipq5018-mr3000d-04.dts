@@ -193,7 +193,7 @@
 		};
 	};
 
-	ess-instance {
+ess-instance {
 		num_devices = <2>;
 
 		// Dummy switch, to describe how the external ports connects to the MAC
@@ -250,9 +250,9 @@
 						   //              SGMII_EN_TX | SGMII_EN_RX | SGMII_EN_PLL
 			>;
 
-			switch_cpu_bmp = <0x40>;  // CPU port bitmap: 3 6
-			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 1 2 3
-			switch_wan_bmp = <0x30>;  // WAN port bitmap: 4
+			switch_cpu_bmp = <0x48>;  // CPU port bitmap: 3 6
+			switch_lan_bmp = <0x34>;  // LAN port bitmap: 2 4 5
+			switch_wan_bmp = <0x02>;  // WAN port bitmap: 1
 
 			qcom,port_phyinfo {
 				// MAC1 -> Phy0 -> WAN
@@ -267,7 +267,7 @@
 					phy_address = <1>;
 				};
 
-				// MAC3 -> Phy2 -> IPQ5018 GE Phy
+				// MAC3 -> Phy2 -> IPQ5000 GE Phy
 				port@3 {
 					port_id = <3>;
 					phy_address = <2>;
@@ -285,7 +285,7 @@
 					phy_address = <4>;
 				};
 
-				// MAC6 ---SGMII---> IPQ5018 MAC1
+				// MAC6 ---SGMII---> IPQ5000 MAC1
 				port@6 {
 					port_id = <6>;
 
@@ -341,135 +341,6 @@
 	};
 };
 
-&mdio1 {
-	pinctrl-0 = <&mdio1_pins>;
-	pinctrl-names = "default";
-	status = "ok";
-
-	reset-gpios = <&tlmm 39 GPIO_ACTIVE_LOW>;
-
-	// QCA8337 Phy0 -> WAN
-	ethernet-phy@0 {
-		reg = <0>;
-	};
-
-	// QCA8337 Phy1 -> LAN1
-	ethernet-phy@1 {
-		reg = <1>;
-	};
-
-	// QCA8337 Phy2 -> IPQ5018 GE Phy
-	ethernet-phy@2 {
-		reg = <2>;
-	};
-
-	// QCA8337 Phy3 -> LAN2
-	ethernet-phy@3 {
-		reg = <3>;
-	};
-
-	// QCA8337 Phy4 -> LAN3
-	ethernet-phy@4 {
-		reg = <4>;
-	};
-};
-
-&q6v5_wcss {
-	compatible = "qcom,ipq5018-q6-mpd";
-	#address-cells = <1>;
-	#size-cells = <1>;
-	ranges;
-
-	resets =
-		<&gcc GCC_WCSSAON_RESET>,
-		<&gcc GCC_WCSS_Q6_BCR>;
-	reset-names =
-		"wcss_aon_reset",
-		"wcss_q6_reset";
-
-	clocks =
-		<&gcc GCC_Q6_AXIS_CLK>,
-		<&gcc GCC_WCSS_ECAHB_CLK>,
-		<&gcc GCC_Q6_AXIM_CLK>,
-		<&gcc GCC_Q6_AXIM2_CLK>,
-		<&gcc GCC_Q6_AHB_CLK>,
-		<&gcc GCC_Q6_AHB_S_CLK>,
-		<&gcc GCC_WCSS_AXI_S_CLK>;
-	clock-names =
-		"gcc_q6_axis_clk",
-		"gcc_wcss_ecahb_clk",
-		"gcc_q6_axim_clk",
-		"gcc_q6_axim2_clk",
-		"gcc_q6_ahb_clk",
-		"gcc_q6_ahb_s_clk",
-		"gcc_wcss_axi_s_clk";
-
-	reg =
-		<0x0cd00000 0x4040>,
-		<0x1938000 0x8>,
-		<0x193d204 0x4>;
-	reg-names =
-		"qdsp6",
-		"tcsr-msip",
-		"tcsr-q6";
-
-	memory-region = <&q6_mem_regions>;
-
-	qcom,rproc = <&q6v5_wcss>;
-	firmware = "IPQ5018/q6_fw.mdt";
-
-	qcom,bootargs_smem = <507>;
-	boot-args = </*       type: */ 0x1 /* PCIE1 */
-		     /*     length: */ 4
-		     /*      PD id: */ 2
-		     /* reset GPIO: */ 15
-		     /*   reserved: */ 0 0>;
-
-	status = "ok";
-
-	// IPQ5018
-	q6_wcss_pd1: remoteproc_pd1@4ab000 {
-		compatible = "qcom,ipq5018-wcss-ahb-mpd";
-
-		resets =
-			<&gcc GCC_WCSSAON_RESET>,
-			<&gcc GCC_WCSS_BCR>,
-			<&gcc GCC_CE_BCR>;
-		reset-names =
-			"wcss_aon_reset",
-			"wcss_reset",
-			"ce_reset";
-
-		clocks =
-			<&gcc GCC_WCSS_AHB_S_CLK>,
-			<&gcc GCC_WCSS_ACMT_CLK>,
-			<&gcc GCC_WCSS_AXI_M_CLK>;
-		clock-names =
-			"gcc_wcss_ahb_s_clk",
-					"gcc_wcss_acmt_clk",
-					"gcc_wcss_axi_m_clk";
-
-		reg = <0x4ab000 0x20>;
-		reg-names = "rmb";
-
-		qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
-
-		interrupts-extended =
-			<&wcss_smp2p_in 8 0>,
-			<&wcss_smp2p_in 9 0>,
-			<&wcss_smp2p_in 12 0>,
-			<&wcss_smp2p_in 11 0>;
-		interrupt-names =
-			"fatal",
-			"ready",
-			"spawn-ack",
-			"stop-ack";
-
-		qcom,smem-states =
-			<&wcss_smp2p_out 8>,
-			<&wcss_smp2p_out 9>,
-			<&wcss_smp2p_out 10>;
-		qcom,smem-state-names =
 			"shutdown",
 			"stop",
 			"spawn";
@@ -534,7 +405,7 @@
 
 	qcom,board_id = <0x60>;
 
-	qcom,bdf-addr = <0x4d100000 0x4d100000 0x4d100000>;
+	qcom,bdf-addr = <0x4d500000 0x4d500000 0x4d100000>;
 	qcom,caldb-addr = <0x4e500000 0x4e500000 0>;
 #ifndef CONFIG_ATH11K_MEM_PROFILE_256M
 	m3-dump-addr = <0x4ea00000>;
