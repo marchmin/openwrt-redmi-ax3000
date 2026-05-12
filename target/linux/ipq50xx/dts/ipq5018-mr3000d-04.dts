@@ -102,7 +102,7 @@
 
 	leds_pins: leds_pins {
 		led_status_red {
-			pins = "gpio17";
+			pins = "gpio30";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
@@ -161,7 +161,7 @@
 
 		led_status_red: led_status_red {
 			label = "blue:system";
-			gpio = <&tlmm 17 GPIO_ACTIVE_HIGH>;
+			gpio = <&tlmm 30 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
 		};
 
@@ -346,7 +346,7 @@
 	pinctrl-names = "default";
 	status = "ok";
 
-	reset-gpios = <&tlmm 26 GPIO_ACTIVE_LOW>;
+	reset-gpios = <&tlmm 39 GPIO_ACTIVE_LOW>;
 
 	// QCA8337 Phy0 -> WAN
 	ethernet-phy@0 {
@@ -419,10 +419,10 @@
 	firmware = "IPQ5018/q6_fw.mdt";
 
 	qcom,bootargs_smem = <507>;
-	boot-args = </*       type: */ 0x2 /* PCIE1 */
+	boot-args = </*       type: */ 0x1 /* PCIE1 */
 		     /*     length: */ 4
 		     /*      PD id: */ 2
-		     /* reset GPIO: */ 27
+		     /* reset GPIO: */ 15
 		     /*   reserved: */ 0 0>;
 
 	status = "ok";
@@ -534,7 +534,7 @@
 
 	qcom,board_id = <0x60>;
 
-	qcom,bdf-addr = <0x4d500000 0x4d500000 0x4d100000>;
+	qcom,bdf-addr = <0x4d100000 0x4d100000 0x4d100000>;
 	qcom,caldb-addr = <0x4e500000 0x4e500000 0>;
 #ifndef CONFIG_ATH11K_MEM_PROFILE_256M
 	m3-dump-addr = <0x4ea00000>;
