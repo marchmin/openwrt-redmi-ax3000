@@ -19,9 +19,9 @@
 		ethernet1 = &mac1;
 
 		led-boot = &led_status_green;
-		led-failsafe = &led_status_red;
+		led-failsafe = &led_status_green;
 		led-running = &led_status_green;
-		led-upgrade = &led_status_blue;
+		led-upgrade = &led_status_green;
 	};
 
 	chosen {
@@ -102,21 +102,14 @@
 
 	leds_pins: leds_pins {
 		led_status_red {
-			pins = "gpio24";
+			pins = "gpio17";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
 		};
 
 		led_status_green {
-			pins = "gpio19";
-			function = "gpio";
-			drive-strength = <8>;
-			bias-pull-down;
-		};
-
-		led_status_blue {
-			pins = "gpio17";
+			pins = "gpio46";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
@@ -125,7 +118,7 @@
 
 	button_pins: button_pins {
 		button_reset {
-			pins = "gpio23";
+			pins = "gpio27";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-up;
@@ -168,18 +161,13 @@
 
 		led_status_red: led_status_red {
 			label = "blue:system";
-			gpio = <&tlmm 24 GPIO_ACTIVE_HIGH>;
+			gpio = <&tlmm 17 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
 		};
 
 		led_status_green: led_status_green {
 			label = "yellow:system";
-			gpio = <&tlmm 19 GPIO_ACTIVE_HIGH>;
-		};
-
-		led_status_blue: led_status_blue {
-			label = "blue:internet";
-			gpio = <&tlmm 17 GPIO_ACTIVE_HIGH>;
+			gpio = <&tlmm 46 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -190,7 +178,7 @@
 
 		button_reset {
 			label = "reset";
-			gpios = <&tlmm 23 GPIO_ACTIVE_LOW>;
+			gpios = <&tlmm 27 GPIO_ACTIVE_LOW>;
 			linux,input-type = <EV_KEY>;
 			linux,code = <KEY_RESTART>;
 			debounce-interval = <60>;
@@ -262,9 +250,9 @@
 						   //              SGMII_EN_TX | SGMII_EN_RX | SGMII_EN_PLL
 			>;
 
-			switch_cpu_bmp = <0x48>;  // CPU port bitmap: 3 6
-			switch_lan_bmp = <0x34>;  // LAN port bitmap: 2 4 5
-			switch_wan_bmp = <0x02>;  // WAN port bitmap: 1
+			switch_cpu_bmp = <0x40>;  // CPU port bitmap: 3 6
+			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 1 2 3
+			switch_wan_bmp = <0x30>;  // WAN port bitmap: 4
 
 			qcom,port_phyinfo {
 				// MAC1 -> Phy0 -> WAN
