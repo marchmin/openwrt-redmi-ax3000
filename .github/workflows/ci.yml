@@ -58,6 +58,14 @@ jobs:
         run: |
           make -j16 download
 
+      - name: Build tools
+        run: |
+          make -j$(nproc) tools/install
+
+      - name: Build toolchain
+        run: |
+          make -j$(nproc) toolchain/install
+          
       - name: Build all
         run: |
           echo -e "$(nproc) thread compile"
