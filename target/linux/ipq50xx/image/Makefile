@@ -42,7 +42,7 @@ define Device/cmcc_rax3000q
   DEVICE_MODEL := RAX3000Q
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  DEVICE_DTS_CONFIG := config@mp02.1
+  DEVICE_DTS_CONFIG := config@mp03.3-v1
   IMAGES := nand-factory.ubi
   DEVICE_PACKAGES := \
 	ath11k-firmware-ipq5018 \
@@ -59,7 +59,7 @@ define Device/cmcc_mr3000d-04
   DEVICE_MODEL := MR3000D-04
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  DEVICE_DTS_CONFIG := config@mp03.3-V1
+  DEVICE_DTS_CONFIG := config@mp03.3-v1
   IMAGES := nand-factory.ubi
   DEVICE_PACKAGES := \
 	ath11k-firmware-ipq5018 \
