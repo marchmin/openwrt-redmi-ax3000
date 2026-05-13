@@ -62,9 +62,10 @@ define Device/cmcc_mr3000d-04
   DEVICE_DTS_CONFIG := config@mp03.3-v1
   IMAGES := nand-factory.ubi
   DEVICE_PACKAGES := \
+	ATH11K_MEM_PROFILE_512M \
 	ath11k-firmware-ipq5018 \
 	ath11k-firmware-qcn6122 \
-	ipq-wifi-cmcc_mr3000d-ci
+	ipq-wifi-cmcc_mr3000d-04
 endef
 TARGET_DEVICES += cmcc_mr3000d-04
 
