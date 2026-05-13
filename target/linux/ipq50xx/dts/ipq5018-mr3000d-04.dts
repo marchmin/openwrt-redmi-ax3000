@@ -54,8 +54,8 @@
 &tlmm {
 	blsp_uart0_pins: blsp_uart0_pins {
 		pins =
-			"gpio28", // RX
-			"gpio29"; // TX
+			"gpio20", // RX
+			"gpio21"; // TX
 		function = "blsp0_uart1";
 		drive-strength = <8>;
 		bias-disable;
