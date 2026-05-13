@@ -346,8 +346,8 @@ ess-instance {
 	pinctrl-names = "default";
 							   
 	status = "ok";
-
-	reset-gpios = <&tlmm 39 GPIO_ACTIVE_LOW>;
+	reset-gpios = <&tlmm 26 GPIO_ACTIVE_LOW>;
+	phy-reset-gpio = <&tlmm 0x27 GPIO_ACTIVE_LOW>;	
 
 	// QCA8337 Phy0 -> LAN3
 	ethernet-phy@0 {
@@ -420,10 +420,10 @@ ess-instance {
 	firmware = "IPQ5018/q6_fw.mdt";
 
 	qcom,bootargs_smem = <507>;
-	boot-args = </*       type: */ 0x2 /* PCIE1 */
+	boot-args = </*       type: */ 0x1 /* PCIE1 */
 		     /*     length: */ 4
-		     /*      PD id: */ 2
-		     /* reset GPIO: */ 27
+		     /*      PD id: */ 3
+		     /* reset GPIO: */ 15
 		     /*   reserved: */ 0 0>;
 
 	status = "ok";
