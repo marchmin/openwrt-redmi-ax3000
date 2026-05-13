@@ -34,11 +34,7 @@
 	reserved-memory {
 		q6_mem_regions: q6_mem_regions@4b000000 {
 			no-map;
-#ifndef CONFIG_ATH11K_MEM_PROFILE_256M
-			reg = <0x0 0x4b000000 0x0 0x3b00000>;
-#else
-			reg = <0x0 0x4b000000 0x0 0x3000000>;
-#endif
+			reg = <0x0 0x4b000000 0x0 0x5400000>;
 		};
 	};
 
@@ -160,13 +156,13 @@
 		pinctrl-names = "default";
 
 		led_status_red: led_status_red {
-			label = "blue:system";
+			label = "red:system";
 			gpio = <&tlmm 30 GPIO_ACTIVE_HIGH>;
 			default-state = "on";
 		};
 
 		led_status_green: led_status_green {
-			label = "yellow:system";
+			label = "green:system";
 			gpio = <&tlmm 46 GPIO_ACTIVE_HIGH>;
 		};
 	};
@@ -211,7 +207,7 @@ ess-instance {
 			switch_mac_mode = <0xf>; // PORT_WRAPPER_SGMII_CHANNEL0
 
 			qcom,port_phyinfo {
-				// MAC0 -> GE Phy -> QCA8337 Phy2
+				// MAC0 -> GE Phy -> QCA8337 Phy4
 				port@0 {
 					port_id = <1>;
 
@@ -236,23 +232,17 @@ ess-instance {
 			compatible = "qcom,ess-switch-qca83xx";
 			device_id = <1>;
 
-			reset_gpio = <26>;
+			reset_gpio = <0x00000027>;
 
 			switch_access_mode = "mdio";
 			mdio-bus = <&mdio1>;
 
-			qca,ar8327-initvals = <
-				0x000c 0x00000080  // PAD6_MODE = MAC6_SGMII_EN
-				0x0010 0x002613a0  // PWS_REG = DEFAULT_VALUE | SERDES_AEN
-				0x0094 0x000010ce  // PORT6_STATUS = DEFAULT_VALUE | DUPLEX_MODE_6 | RXMAC_EN_6 |
-						   //                TXMAC_EN_6 | SPEED_6(1000M)
-				0x00e0 0xc74164de  // SGMII_CTRL = DEFAULT_VALUE | MODE_CTRL_25M(SGMII_PHY) | SGMII_EN_SD |
-						   //              SGMII_EN_TX | SGMII_EN_RX | SGMII_EN_PLL
-			>;
+	        qca,ar8327-initvals = <0x00000004 0x07600000 0x00000008 0x01000000 0x0000000c 0x00000080 0x00000010 0x002613a0 0x000000e4 0x000aa545 0x000000e0 0xc74164de 0x0000007c 0x0000004e 0x00000094 0x0000004e>;
 
-			switch_cpu_bmp = <0x48>;  // CPU port bitmap: 3 6
-			switch_lan_bmp = <0x34>;  // LAN port bitmap: 2 4 5
-			switch_wan_bmp = <0x02>;  // WAN port bitmap: 1
+
+			switch_cpu_bmp = <0x40>;  // CPU port bitmap:  6
+			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 123
+			switch_wan_bmp = <0x30>;  // WAN port bitmap: 4
 
 			qcom,port_phyinfo {
 				// MAC1 -> Phy0 -> WAN
@@ -335,7 +325,7 @@ ess-instance {
 &mdio0 {
 	status = "ok";
 
-	// IPQ5018 GE Phy -> QCA8337 Phy2
+	// IPQ5018 GE Phy -> QCA8337 Phy4
 	ethernet-phy@0 {
 		reg = <7>;
 	};
