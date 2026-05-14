@@ -26,7 +26,7 @@
 
 	chosen {
 		// Override the root parameter from u-boot
-    bootargs-append = " root=/dev/ubiblock0_1 swiotlb=1 coherent_pool=2M";
+     	bootargs-append = " root=/dev/ubiblock0_1 swiotlb=1 coherent_pool=2M";
 		stdout-path = "serial0:115200n8";
 	};
 
