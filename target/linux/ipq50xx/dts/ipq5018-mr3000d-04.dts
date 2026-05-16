@@ -166,14 +166,6 @@
 	status = "ok";
 };
 
-&qfprom {
-	status = "ok";
-};
-
-&tsens {
-	status = "ok";
-};
-
 &soc {
 	leds {
 		compatible = "gpio-leds";
@@ -388,23 +380,48 @@
 	};
 };
 
-&qcom_q6v5_wcss {
-	qcom,multipd_arch;
-	memory-region = <&q6_mem_regions>;
-		firmware = "IPQ5018/q6_fw.mdt";
-		m3_firmware = "IPQ5018/m3_fw.mdt";
 
-	qcom,share_bootargs;
+&q6v5_wcss {
+	memory-region = <&q6_mem_regions>;
+
+	qcom,rproc = <&q6v5_wcss>;
+	firmware = "IPQ5018/q6_fw.mdt";
+
 	qcom,bootargs_smem = <507>;
-	boot-args = </*       type: */ 0x1 /* PCIE0 */
+	boot-args = </*       type: */ 0x1 /* PCIE1 */
 		     /*     length: */ 4
-		     /*      PD id: */ 3
+		     /*      PD id: */ 2
 		     /* reset GPIO: */ 15
 		     /*   reserved: */ 0 0>;
+
+	status = "ok";
 						
-	// IPQ5018
-	q6v5_wcss_userpd1 {
-		qca,asid = <1>;
+// IPQ5018
+	q6_wcss_pd1: remoteproc_pd1@4ab000 {
+		compatible = "qcom,ipq5018-wcss-ahb-mpd";
+
+		resets =
+			<&gcc GCC_WCSSAON_RESET>,
+			<&gcc GCC_WCSS_BCR>,
+			<&gcc GCC_CE_BCR>;
+		reset-names =
+			"wcss_aon_reset",
+			"wcss_reset",
+			"ce_reset";
+
+		clocks =
+			<&gcc GCC_WCSS_AHB_S_CLK>,
+			<&gcc GCC_WCSS_ACMT_CLK>,
+			<&gcc GCC_WCSS_AXI_M_CLK>;
+		clock-names =
+			"gcc_wcss_ahb_s_clk",
+					"gcc_wcss_acmt_clk",
+					"gcc_wcss_axi_m_clk";
+
+		reg = <0x4ab000 0x20>;
+		reg-names = "rmb";
+
+		// qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
 
 		interrupts-extended =
 			<&wcss_smp2p_in 8 0>,
@@ -414,7 +431,7 @@
 		interrupt-names =
 			"fatal",
 			"ready",
-			"spawn_ack",
+			"spawn-ack",
 			"stop-ack";
 
 		qcom,smem-states =
@@ -426,14 +443,13 @@
 			"stop",
 			"spawn";
 
+		firmware = "IPQ5018/q6_fw.mdt";
 		m3_firmware = "IPQ5018/m3_fw.mdt";
-		qca,auto-restart;
-		qca,int_radio;
 	};
 
 	// QCN6102
-	q6v5_wcss_userpd3 {
-		qca,asid = <3>;
+	q6_wcss_pd2: remoteproc_pd2 {
+		compatible = "qcom,ipq5018-wcss-pcie-mpd";
 
 		interrupts-extended =
 			<&wcss_smp2p_in 16 0>,
@@ -443,7 +459,7 @@
 		interrupt-names =
 			"fatal",
 			"ready",
-			"spawn_ack",
+			"spawn-ack",
 			"stop-ack";
 
 		qcom,smem-states =
@@ -455,13 +471,13 @@
 			"stop",
 			"spawn";
 
+		firmware = "IPQ5018/q6_fw.mdt";
 		m3_firmware = "qcn6122/m3_fw.mdt";
-		qca,auto-restart;
 	};
 };
 
 &wifi0 {
-	// IPQ5000
+	// IPQ5018
 	qcom,multipd_arch;
 	qcom,userpd-subsys-name = "q6v5_wcss_userpd1";
 
@@ -470,7 +486,7 @@
 	
 	qcom,bdf-addr = <0x4c400000 0x4c400000 0x4c400000 0 0>;
 
-	qcom,caldb-addr = <0x4d400000 0x4d400000 0x00000000 0x00 0x00>;
+	qcom,caldb-addr = <0x4d400000>;
 	//m3-dump-addr = <0x4d400000>;
 
 
@@ -480,14 +496,14 @@
 &wifi1 {
 	// QCN6102
 	qcom,multipd_arch;
-	qcom,userpd-subsys-name = "q6v5_wcss_userpd3";
+	qcom,userpd-subsys-name = "q6v5_wcss_userpd2";
 
 	qcom,board_id = <0x60>;
 	qcom,tgt-mem-mode = <1>;
 	
 	qcom,bdf-addr = <0x4ed00000 0x4ed00000 0x4e400000 0 0>;
 
-	qcom,caldb-addr = <0x4ff00000 0x4ff00000 0x00 0x00 0x00>;
+	qcom,caldb-addr = <0x4ff00000>;
 	m3-dump-addr = <0x4ea00000>;
 
 
