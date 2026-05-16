@@ -5,8 +5,8 @@
 #include "ipq5018.dtsi"
 
 / {
-	model = "CMCC MR3000D-04";
-	compatible = "cmcc,mr3000d-04", "qcom,ipq5018";
+	model = "Redmi AX3000";
+	compatible = "redmi,ax3000", "qcom,ipq5018";
 
 	#address-cells = <2>;
 	#size-cells = <2>;
@@ -18,22 +18,30 @@
 		ethernet0 = &mac0;
 		ethernet1 = &mac1;
 
-		led-boot = &led_status_green;
-		led-failsafe = &led_status_green;
-		led-running = &led_status_green;
-		led-upgrade = &led_status_green;
+		led-boot = &led_system_blue;
+		led-failsafe = &led_system_yellow;
+		led-running = &led_system_blue;
+		led-upgrade = &led_system_yellow;
 	};
 
 	chosen {
 		// Override the root parameter from u-boot
-		bootargs-append = " root=/dev/ubiblock0_1 swiotlb=1 coherent_pool=2M";
+		// Increase coherent_pool size for WiFi
+		bootargs-append = " root=/dev/ubiblock0_1 coherent_pool=2M";
 		stdout-path = "serial0:115200n8";
 	};
 
 	reserved-memory {
+
+		tz_apps@4a400000 {
+			no-map;
+			// The size is incorrent, but it works
+			reg = <0x0 0x4a400000 0x0 0x700000>;
+		};
+
 		q6_mem_regions: q6_mem_regions@4b000000 {
 			no-map;
-			reg = <0x0 0x4b000000 0x0 0x5400000>;
+			reg = <0x00 0x4b000000 0x00 0x5400000>;
 		};
 	};
 
@@ -42,16 +50,11 @@
 	};
 };
 
-&tmc_etr {
-	/delete-property/ memory_region;
-};
-
-
 &tlmm {
 	blsp_uart0_pins: blsp_uart0_pins {
 		pins =
-			"gpio20", // RX
-			"gpio21"; // TX
+			"gpio28", // RX
+			"gpio29"; // TX
 		function = "blsp0_uart1";
 		drive-strength = <8>;
 		bias-disable;
@@ -72,30 +75,9 @@
 			bias-disable;
 		};
 
-		data0 {
-			pins = "gpio7";
-			function = "qspi0";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data1 {
-			pins = "gpio6";
-			function = "qspi1";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data2 {
-			pins = "gpio5";
-			function = "qspi2";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data3 {
-			pins = "gpio4";
-			function = "qspi3";
+		data {
+			pins = "gpio7", "gpio6", "gpio5", "gpio4";
+			function = "qspi_data";
 			drive-strength = <8>;
 			bias-disable;
 		};
@@ -118,15 +100,29 @@
 	};
 
 	leds_pins: leds_pins {
-		led_status_red {
-			pins = "gpio30";
+		led_system_blue {
+			pins = "gpio19";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
 		};
-			
-		led_status_green {
-			pins = "gpio46";
+
+		led_system_yellow {
+			pins = "gpio17";
+			function = "gpio";
+			drive-strength = <8>;
+			bias-pull-down;
+		};
+
+		led_internet_blue {
+			pins = "gpio22";
+			function = "gpio";
+			drive-strength = <8>;
+			bias-pull-down;
+		};
+
+		led_internet_yellow {
+			pins = "gpio20";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
@@ -135,14 +131,14 @@
 
 	button_pins: button_pins {
 		button_reset {
-			pins = "gpio27";
+			pins = "gpio25";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-up;
 		};
 
 		button_mesh {
-			pins = "gpio38";
+			pins = "gpio23";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-up;
@@ -166,20 +162,35 @@
 	status = "ok";
 };
 
+&tsens {
+	status = "ok";
+};
+
 &soc {
 	leds {
 		compatible = "gpio-leds";
 		pinctrl-0 = <&leds_pins>;
 		pinctrl-names = "default";
 
-		led_status_red: led_status_red {
-			label = "red:system";
-			gpio = <&tlmm 30 GPIO_ACTIVE_HIGH>;
+		led_system_blue: led_system_blue {
+			label = "blue:system";
+			gpio = <&tlmm 19 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
 		};
 
-		led_status_green: led_status_green {
-			label = "green:system";
-			gpio = <&tlmm 46 GPIO_ACTIVE_HIGH>;
+		led_system_yellow: led_system_yellow {
+			label = "yellow:system";
+			gpio = <&tlmm 17 GPIO_ACTIVE_HIGH>;
+		};
+
+		led_internet_blue: led_internet_blue {
+			label = "blue:internet";
+			gpio = <&tlmm 22 GPIO_ACTIVE_HIGH>;
+		};
+
+		led_internet_yellow: led_internet_yellow {
+			label = "yellow:internet";
+			gpio = <&tlmm 20 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -190,7 +201,7 @@
 
 		button_reset {
 			label = "reset";
-			gpios = <&tlmm 27 GPIO_ACTIVE_LOW>;
+			gpios = <&tlmm 25 GPIO_ACTIVE_LOW>;
 			linux,input-type = <EV_KEY>;
 			linux,code = <KEY_RESTART>;
 			debounce-interval = <60>;
@@ -198,7 +209,7 @@
 
 		button_mesh {
 			label = "mesh";
-			gpios = <&tlmm 38 GPIO_ACTIVE_LOW>;
+			gpios = <&tlmm 23 GPIO_ACTIVE_LOW>;
 			linux,input-type = <EV_KEY>;
 			linux,code = <KEY_WPS_BUTTON>;
 			debounce-interval = <60>;
@@ -215,14 +226,15 @@
 		ess-switch@0x39c00000 {
 			compatible = "qcom,ess-switch-ipq50xx";
 			device_id = <0>;
+
 			cmnblk_clk = "internal_96MHz";
+
 			// MAC1 Mode
 			// switch_mac_mode = <0xc>; // PORT_WRAPPER_SGMII_PLUS
 			switch_mac_mode = <0xf>; // PORT_WRAPPER_SGMII_CHANNEL0
-			//switch_access_mode = "local bus";
-			
+
 			qcom,port_phyinfo {
-				// MAC0 -> GE Phy -> QCA8337 Phy2
+				// MAC0 -> GE Phy -> QCA8337 Phy4
 				port@0 {
 					port_id = <1>;
 
@@ -247,7 +259,7 @@
 			compatible = "qcom,ess-switch-qca83xx";
 			device_id = <1>;
 
-			reset_gpio = <0x00000027>;
+			reset_gpio = <26>;
 
 			switch_access_mode = "mdio";
 			mdio-bus = <&mdio1>;
@@ -261,35 +273,40 @@
 						   //              SGMII_EN_TX | SGMII_EN_RX | SGMII_EN_PLL
 			>;
 
-			switch_cpu_bmp = <0x60>;  // CPU port bitmap:  6
-			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 1 2 3 
+			switch_cpu_bmp = <0x60>;  // CPU port bitmap: 5 6
+			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 1 2 3
 			switch_wan_bmp = <0x10>;  // WAN port bitmap: 4
 
 			qcom,port_phyinfo {
-				// MAC1 -> Phy0 -> WAN
+				// MAC1 -> Phy0 -> LAN1
 				port@1 {
 					port_id = <1>;
 					phy_address = <0>;
 				};
 
-				// MAC2 -> Phy1 -> LAN1
+				// MAC2 -> Phy1 -> LAN2
 				port@2 {
 					port_id = <2>;
 					phy_address = <1>;
 				};
 
-				// MAC4 -> Phy3 -> LAN2
+				// MAC3 -> Phy2 -> LAN3
 				port@3 {
 					port_id = <3>;
 					phy_address = <2>;
 				};
 
-				// MAC4 -> Phy3 -> LAN2
+				// MAC4 -> Phy3 -> WAN
 				port@4 {
 					port_id = <4>;
 					phy_address = <3>;
 				};
 
+				// MAC5 -> Phy4 -> IPQ5000 GE Phy
+				port@5 {
+					port_id = <5>;
+					phy_address = <4>;
+				};
 
 				// MAC6 ---SGMII---> IPQ5000 MAC1
 				port@6 {
@@ -341,7 +358,7 @@
 &mdio0 {
 	status = "ok";
 
-	// IPQ5018 GE Phy -> QCA8337 Phy2
+	// IPQ5018 GE Phy -> QCA8337 Phy4
 	ethernet-phy@0 {
 		reg = <7>;
 	};
@@ -350,53 +367,89 @@
 &mdio1 {
 	pinctrl-0 = <&mdio1_pins>;
 	pinctrl-names = "default";
+	phy-reset-gpio = <&tlmm 26 0>;
 	status = "ok";
-    phy-reset-gpio = <&tlmm 39 GPIO_ACTIVE_LOW>;
-	reset-gpios = <&tlmm 39 GPIO_ACTIVE_LOW>;
 
-	// QCA8337 Phy0 -> WAN
+	// QCA8337 Phy0 -> LAN1
 	ethernet-phy@0 {
 		reg = <0>;
 	};
 
-	// QCA8337 Phy1 -> LAN1
+	// QCA8337 Phy1 -> LAN2
 	ethernet-phy@1 {
 		reg = <1>;
 	};
 
-	// QCA8337 Phy2 -> IPQ5018 GE Phy
+	// QCA8337 Phy2 -> LAN3
 	ethernet-phy@2 {
 		reg = <2>;
 	};
 
-	// QCA8337 Phy3 -> LAN2
+	// QCA8337 Phy3 -> WAN
 	ethernet-phy@3 {
 		reg = <3>;
 	};
 
-	// QCA8337 Phy4 -> LAN3
+	// QCA8337 Phy4 -> IPQ5018 GE Phy
 	ethernet-phy@4 {
 		reg = <4>;
 	};
 };
 
-
 &q6v5_wcss {
+	compatible = "qcom,ipq5018-q6-mpd";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	ranges;
+
+	resets =
+		<&gcc GCC_WCSSAON_RESET>,
+		<&gcc GCC_WCSS_Q6_BCR>;
+	reset-names =
+		"wcss_aon_reset",
+		"wcss_q6_reset";
+
+	clocks =
+		<&gcc GCC_Q6_AXIS_CLK>,
+		<&gcc GCC_WCSS_ECAHB_CLK>,
+		<&gcc GCC_Q6_AXIM_CLK>,
+		<&gcc GCC_Q6_AXIM2_CLK>,
+		<&gcc GCC_Q6_AHB_CLK>,
+		<&gcc GCC_Q6_AHB_S_CLK>,
+		<&gcc GCC_WCSS_AXI_S_CLK>;
+	clock-names =
+		"gcc_q6_axis_clk",
+		"gcc_wcss_ecahb_clk",
+		"gcc_q6_axim_clk",
+		"gcc_q6_axim2_clk",
+		"gcc_q6_ahb_clk",
+		"gcc_q6_ahb_s_clk",
+		"gcc_wcss_axi_s_clk";
+
+	reg =
+		<0x0cd00000 0x4040>,
+		<0x1938000 0x8>,
+		<0x193d204 0x4>;
+	reg-names =
+		"qdsp6",
+		"tcsr-msip",
+		"tcsr-q6";
+
 	memory-region = <&q6_mem_regions>;
 
 	qcom,rproc = <&q6v5_wcss>;
 	firmware = "IPQ5018/q6_fw.mdt";
 
 	qcom,bootargs_smem = <507>;
-	boot-args = </*       type: */ 0x1 /* PCIE1 */
+	boot-args = </*       type: */ 0x2 /* PCIE1 */
 		     /*     length: */ 4
 		     /*      PD id: */ 2
-		     /* reset GPIO: */ 15
+		     /* reset GPIO: */ 27
 		     /*   reserved: */ 0 0>;
 
 	status = "ok";
-						
-// IPQ5018
+
+	// IPQ5018
 	q6_wcss_pd1: remoteproc_pd1@4ab000 {
 		compatible = "qcom,ipq5018-wcss-ahb-mpd";
 
@@ -421,7 +474,7 @@
 		reg = <0x4ab000 0x20>;
 		reg-names = "rmb";
 
-		// qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
+		qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
 
 		interrupts-extended =
 			<&wcss_smp2p_in 8 0>,
@@ -477,18 +530,23 @@
 };
 
 &wifi0 {
-	// IPQ5018
+	// IPQ5000
 	qcom,multipd_arch;
+	qcom,rproc = <&q6_wcss_pd1>;
 	qcom,userpd-subsys-name = "q6v5_wcss_userpd1";
 
+	// Be overridden by /etc/hotplug.d/firmware/10-ath11k-board_id
+	// M79: 0x10
+	// M81: 0x24
 	qcom,board_id = <0x24>;
-	qcom,tgt-mem-mode = <1>;
-	
-	qcom,bdf-addr = <0x4c400000 0x4c400000 0x4c400000 0 0>;
 
-	qcom,caldb-addr = <0x4d400000>;
-	//m3-dump-addr = <0x4d400000>;
-
+	qcom,bdf-addr = <0x4c400000 0x4c400000 0x4c400000>;
+	qcom,caldb-addr = <0x4d200000 0x4d200000 0>;
+#ifndef CONFIG_ATH11K_MEM_PROFILE_256M
+	m3-dump-addr = <0x4d400000>;
+#else
+	m3-dump-addr = <0>;
+#endif
 
 	status = "ok";
 };
@@ -496,16 +554,18 @@
 &wifi1 {
 	// QCN6102
 	qcom,multipd_arch;
+	qcom,rproc = <&q6_wcss_pd2>;
 	qcom,userpd-subsys-name = "q6v5_wcss_userpd2";
 
 	qcom,board_id = <0x60>;
-	qcom,tgt-mem-mode = <1>;
-	
-	qcom,bdf-addr = <0x4ed00000 0x4ed00000 0x4e400000 0 0>;
 
-	qcom,caldb-addr = <0x4ff00000>;
+	qcom,bdf-addr = <0x4d500000 0x4d500000 0x4d100000>;
+	qcom,caldb-addr = <0x4e500000 0x4e500000 0>;
+#ifndef CONFIG_ATH11K_MEM_PROFILE_256M
 	m3-dump-addr = <0x4ea00000>;
-
+#else
+	m3-dump-addr = <0x4df00000>;
+#endif
 
 	status = "ok";
 };
