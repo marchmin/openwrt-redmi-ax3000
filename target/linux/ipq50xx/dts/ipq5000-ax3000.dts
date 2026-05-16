@@ -32,23 +32,22 @@
 	};
 
 	reserved-memory {
+
+		tz_apps@4a400000 {
+			no-map;
+			// The size is incorrent, but it works
+			reg = <0x0 0x4a400000 0x0 0x700000>;
+		};
+
 		q6_mem_regions: q6_mem_regions@4b000000 {
 			no-map;
-#ifndef CONFIG_ATH11K_MEM_PROFILE_256M
-			reg = <0x0 0x4b000000 0x0 0x3b00000>;
-#else
-			reg = <0x0 0x4b000000 0x0 0x3000000>;
-#endif
+			reg = <0x00 0x4b000000 0x00 0x5400000>;
 		};
 	};
 
 	thermal-zones {
 		status = "ok";
 	};
-};
-
-&tmc_etr {
-	/delete-property/ memory-region;
 };
 
 &tlmm {
