@@ -26,6 +26,7 @@
 
 	chosen {
 		// Override the root parameter from u-boot
+		// Increase coherent_pool size for WiFi
 		bootargs-append = " root=/dev/ubiblock0_1 swiotlb=1 coherent_pool=2M";
 		stdout-path = "serial0:115200n8";
 	};
@@ -42,17 +43,12 @@
 	};
 };
 
-&tmc_etr {
-	/delete-property/ memory_region;
-};
-
-
 &tlmm {
 	blsp_uart0_pins: blsp_uart0_pins {
 		pins =
-			"gpio20", // RX
-			"gpio21"; // TX
-		function = "blsp0_uart1";
+			"gpio28", // RX
+			"gpio29"; // TX
+		function = "blsp1_uart1";
 		drive-strength = <8>;
 		bias-disable;
 	};
@@ -72,30 +68,9 @@
 			bias-disable;
 		};
 
-		data0 {
-			pins = "gpio7";
-			function = "qspi0";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data1 {
-			pins = "gpio6";
-			function = "qspi1";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data2 {
-			pins = "gpio5";
-			function = "qspi2";
-			drive-strength = <8>;
-			bias-disable;
-		};
-
-		data3 {
-			pins = "gpio4";
-			function = "qspi3";
+		data {
+			pins = "gpio7", "gpio6", "gpio5", "gpio4";
+			function = "qspi_data";
 			drive-strength = <8>;
 			bias-disable;
 		};
@@ -118,13 +93,14 @@
 	};
 
 	leds_pins: leds_pins {
+			// led_2g
 		led_status_red {
 			pins = "gpio30";
 			function = "gpio";
 			drive-strength = <8>;
 			bias-pull-down;
 		};
-			
+			// led_5g
 		led_status_green {
 			pins = "gpio46";
 			function = "gpio";
@@ -163,6 +139,10 @@
 &nand {
 	pinctrl-0 = <&qspi_nand_pins>;
 	pinctrl-names = "default";
+	status = "ok";
+};
+
+&tsens {
 	status = "ok";
 };
 
@@ -215,14 +195,15 @@
 		ess-switch@0x39c00000 {
 			compatible = "qcom,ess-switch-ipq50xx";
 			device_id = <0>;
+
 			cmnblk_clk = "internal_96MHz";
+
 			// MAC1 Mode
 			// switch_mac_mode = <0xc>; // PORT_WRAPPER_SGMII_PLUS
 			switch_mac_mode = <0xf>; // PORT_WRAPPER_SGMII_CHANNEL0
-			//switch_access_mode = "local bus";
-			
+
 			qcom,port_phyinfo {
-				// MAC0 -> GE Phy -> QCA8337 Phy2
+				// MAC0 -> GE Phy -> QCA8337 Phy4
 				port@0 {
 					port_id = <1>;
 
@@ -247,7 +228,7 @@
 			compatible = "qcom,ess-switch-qca83xx";
 			device_id = <1>;
 
-			reset_gpio = <0x00000027>;
+			reset_gpio = <0x27>;
 
 			switch_access_mode = "mdio";
 			mdio-bus = <&mdio1>;
@@ -255,49 +236,42 @@
 			qca,ar8327-initvals = <
 				0x000c 0x00000080  // PAD6_MODE = MAC6_SGMII_EN
 				0x0010 0x002613a0  // PWS_REG = DEFAULT_VALUE | SERDES_AEN
-				0x0094 0x000010ce  // PORT6_STATUS = DEFAULT_VALUE | DUPLEX_MODE_6 | RXMAC_EN_6 |
+				0x0094 0x0000004e  // PORT6_STATUS = DEFAULT_VALUE | DUPLEX_MODE_6 | RXMAC_EN_6 |
 						   //                TXMAC_EN_6 | SPEED_6(1000M)
 				0x00e0 0xc74164de  // SGMII_CTRL = DEFAULT_VALUE | MODE_CTRL_25M(SGMII_PHY) | SGMII_EN_SD |
 						   //              SGMII_EN_TX | SGMII_EN_RX | SGMII_EN_PLL
 			>;
 
-			switch_cpu_bmp = <0x60>;  // CPU port bitmap:  6
-			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 1 2 3 
-			switch_wan_bmp = <0x10>;  // WAN port bitmap: 4
+			switch_cpu_bmp = <0x40>;  // CPU port bitmap: 
+			switch_lan_bmp = <0x0e>;  // LAN port bitmap: 
+			switch_wan_bmp = <0x30>;  // WAN port bitmap: 
 
 			qcom,port_phyinfo {
-				// MAC1 -> Phy0 -> WAN
+			
+				// MAC1 -> Phy0 -> LAN3
 				port@1 {
 					port_id = <1>;
 					phy_address = <0>;
 				};
 
-				// MAC2 -> Phy1 -> LAN1
+				// MAC2 -> Phy1 -> LAN2
 				port@2 {
 					port_id = <2>;
 					phy_address = <1>;
 				};
 
-				// MAC4 -> Phy3 -> LAN2
+				// MAC3 -> Phy2 -> LAN1
 				port@3 {
 					port_id = <3>;
 					phy_address = <2>;
 				};
 
-				// MAC4 -> Phy3 -> LAN2
+				// MAC4 -> Phy3 -> WAN
 				port@4 {
 					port_id = <4>;
 					phy_address = <3>;
 				};
 
-
-				// MAC6 ---SGMII---> IPQ5000 MAC1
-				port@6 {
-					port_id = <6>;
-
-					forced-speed = <1000>;
-					forced-duplex = <1>;
-				};
 			};
 		};
 	};
@@ -341,7 +315,7 @@
 &mdio0 {
 	status = "ok";
 
-	// IPQ5018 GE Phy -> QCA8337 Phy2
+	// IPQ5018 GE Phy -> QCA8337 Phy4
 	ethernet-phy@0 {
 		reg = <7>;
 	};
@@ -350,38 +324,76 @@
 &mdio1 {
 	pinctrl-0 = <&mdio1_pins>;
 	pinctrl-names = "default";
+							   
 	status = "ok";
-    phy-reset-gpio = <&tlmm 39 GPIO_ACTIVE_LOW>;
+
 	reset-gpios = <&tlmm 39 GPIO_ACTIVE_LOW>;
 
-	// QCA8337 Phy0 -> WAN
+	// QCA8337 Phy0 -> LAN3
 	ethernet-phy@0 {
 		reg = <0>;
 	};
 
-	// QCA8337 Phy1 -> LAN1
+	// QCA8337 Phy1 -> LAN2
 	ethernet-phy@1 {
 		reg = <1>;
 	};
 
-	// QCA8337 Phy2 -> IPQ5018 GE Phy
+	// QCA8337 Phy2 -> LAN1
 	ethernet-phy@2 {
 		reg = <2>;
 	};
 
-	// QCA8337 Phy3 -> LAN2
+	// QCA8337 Phy3 -> WAN
 	ethernet-phy@3 {
 		reg = <3>;
 	};
 
-	// QCA8337 Phy4 -> LAN3
+	// QCA8337 Phy4 -> IPQ5018 GE Phy
 	ethernet-phy@4 {
 		reg = <4>;
 	};
 };
 
-
 &q6v5_wcss {
+	compatible = "qcom,ipq5018-q6-mpd";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	ranges;
+
+	resets =
+		<&gcc GCC_WCSSAON_RESET>,
+		<&gcc GCC_WCSS_Q6_BCR>;
+	reset-names =
+		"wcss_aon_reset",
+		"wcss_q6_reset";
+
+	clocks =
+		<&gcc GCC_Q6_AXIS_CLK>,
+		<&gcc GCC_WCSS_ECAHB_CLK>,
+		<&gcc GCC_Q6_AXIM_CLK>,
+		<&gcc GCC_Q6_AXIM2_CLK>,
+		<&gcc GCC_Q6_AHB_CLK>,
+		<&gcc GCC_Q6_AHB_S_CLK>,
+		<&gcc GCC_WCSS_AXI_S_CLK>;
+	clock-names =
+		"gcc_q6_axis_clk",
+		"gcc_wcss_ecahb_clk",
+		"gcc_q6_axim_clk",
+		"gcc_q6_axim2_clk",
+		"gcc_q6_ahb_clk",
+		"gcc_q6_ahb_s_clk",
+		"gcc_wcss_axi_s_clk";
+
+	reg =
+		<0x0cd00000 0x4040>,
+		<0x1938000 0x8>,
+		<0x193d204 0x4>;
+	reg-names =
+		"qdsp6",
+		"tcsr-msip",
+		"tcsr-q6";
+
 	memory-region = <&q6_mem_regions>;
 
 	qcom,rproc = <&q6v5_wcss>;
@@ -395,8 +407,8 @@
 		     /*   reserved: */ 0 0>;
 
 	status = "ok";
-						
-// IPQ5018
+
+	// IPQ5018
 	q6_wcss_pd1: remoteproc_pd1@4ab000 {
 		compatible = "qcom,ipq5018-wcss-ahb-mpd";
 
@@ -421,7 +433,7 @@
 		reg = <0x4ab000 0x20>;
 		reg-names = "rmb";
 
-		// qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
+		qcom,halt-regs = <&tcsr_q6_block 0xa000 0xd000 0x0>;
 
 		interrupts-extended =
 			<&wcss_smp2p_in 8 0>,
@@ -479,16 +491,14 @@
 &wifi0 {
 	// IPQ5018
 	qcom,multipd_arch;
+	qcom,rproc = <&q6_wcss_pd1>;
 	qcom,userpd-subsys-name = "q6v5_wcss_userpd1";
 
 	qcom,board_id = <0x24>;
-	qcom,tgt-mem-mode = <1>;
-	
-	qcom,bdf-addr = <0x4c400000 0x4c400000 0x4c400000 0 0>;
 
-	qcom,caldb-addr = <0x4d400000>;
-	//m3-dump-addr = <0x4d400000>;
-
+	qcom,bdf-addr = <0x4c400000 0x4c400000 0x4c400000>;
+	qcom,caldb-addr = <0x4d400000 0x4d400000 0>;
+	//m3-dump-addr = <0>;
 
 	status = "ok";
 };
@@ -496,16 +506,14 @@
 &wifi1 {
 	// QCN6102
 	qcom,multipd_arch;
+	qcom,rproc = <&q6_wcss_pd2>;
 	qcom,userpd-subsys-name = "q6v5_wcss_userpd2";
 
 	qcom,board_id = <0x60>;
-	qcom,tgt-mem-mode = <1>;
-	
-	qcom,bdf-addr = <0x4ed00000 0x4ed00000 0x4e400000 0 0>;
 
-	qcom,caldb-addr = <0x4ff00000>;
-	m3-dump-addr = <0x4ea00000>;
-
+	qcom,bdf-addr = <0x4ed00000 0x4ed00000 0x4e400000>;
+	qcom,caldb-addr = <0x4ff00000 0x4ff00000 0>;	
+	m3-dump-addr = <0x4df00000>;
 
 	status = "ok";
 };
